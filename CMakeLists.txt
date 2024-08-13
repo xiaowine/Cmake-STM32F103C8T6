@@ -37,7 +37,9 @@ message("Build type: " ${CMAKE_BUILD_TYPE})
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME}
         Core/Src/retarget.c
-        Core/Inc/retarget.h)
+        Core/Inc/retarget.h
+        Core/Src/Drive_DHT11.c
+)
 
 # Add STM32CubeMX generated sources
 add_subdirectory(cmake/stm32cubemx)
