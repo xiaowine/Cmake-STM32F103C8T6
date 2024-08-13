@@ -106,7 +106,7 @@ int main(void)
     {
         HAL_Delay(500);
         DHT11_Read_TempHumi(&DH);
-        printf("temp: %d, hudi: %d\n", DH.temp_high8bit, DH.humi_high8bit);
+        printf("温度: %d℃, 湿度: %d%%\n", DH.temp_high8bit, DH.humi_high8bit);
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
