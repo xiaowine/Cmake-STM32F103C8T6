@@ -44,12 +44,6 @@
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-
-#define RX_BUFFER_SIZE 100
-uint8_t rxBuffer[RX_BUFFER_SIZE]; // 增大缓冲区大小
-uint8_t tempBuffer[1]; // 临时缓冲区
-volatile uint16_t writeIndex = 0; // 写入索引
-volatile uint16_t readIndex = 0; // 读取索引
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -62,35 +56,6 @@ static void MX_USART1_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
-{
-    if (huart->Instance == USART1)
-    {
-        for (int i = 0; i < sizeof(tempBuffer); i++)
-        {
-            rxBuffer[writeIndex] = tempBuffer[i];
-            writeIndex = (writeIndex + 1) % RX_BUFFER_SIZE;
-
-            // 检查是否有溢出
-            if (writeIndex == readIndex)
-            {
-                printf("Buffer overflow detected!\n");
-                readIndex = (readIndex + 1) % RX_BUFFER_SIZE; // 丢弃最旧的数据
-            }
-        }
-
-        HAL_UART_Receive_IT(&huart1, tempBuffer, sizeof(tempBuffer));
-    }
-}
-
-void processReceivedData(void)
-{
-    while (readIndex != writeIndex)
-    {
-        printf("%c", rxBuffer[readIndex]);
-        readIndex = (readIndex + 1) % RX_BUFFER_SIZE;
-    }
-}
 
 /* USER CODE END 0 */
 
@@ -130,10 +95,10 @@ int main(void)
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
     RetargetInit(&huart1);
-    HAL_UART_Receive_IT(&huart1, tempBuffer, sizeof(tempBuffer));
     while (1)
     {
-        processReceivedData();
+        printf("Hello World\n");
+        HAL_Delay(1000);
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
