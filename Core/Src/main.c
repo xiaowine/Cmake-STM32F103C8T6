@@ -47,15 +47,8 @@
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
-
-volatile uint8_t uart1RxFlag = 0; // 中断标志符
-
 #define RX_BUFFER_SIZE 100
 uint8_t rxBuffer[RX_BUFFER_SIZE]; // 增大缓冲区大小
-uint8_t tempBuffer[1]; // 临时缓冲区
-volatile uint16_t writeIndex = 0; // 写入索引
-volatile uint16_t readIndex = 0; // 读取索引
-char* ac = "";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -68,41 +61,17 @@ static void MX_USART1_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart, uint16_t size)
 {
     if (huart->Instance == USART1)
     {
-        for (size_t i = 0; i < sizeof(tempBuffer); i++)
-        {
-            rxBuffer[writeIndex] = tempBuffer[i];
-            writeIndex = (writeIndex + 1) % RX_BUFFER_SIZE;
-
-            // 检查是否有溢出
-            if (writeIndex == readIndex)
-            {
-                printf("Buffer overflow detected!\n");
-                readIndex = (readIndex + 1) % RX_BUFFER_SIZE; // 丢弃最旧的数据
-            }
-        }
-
-        uart1RxFlag = 1; // 设置中断标志符
-        HAL_UART_Receive_IT(&huart1, tempBuffer, sizeof(tempBuffer));
+        char formattedString[RX_BUFFER_SIZE];
+        snprintf(formattedString, sizeof(formattedString), "%.*s\n", size, &*rxBuffer);
+        printf("%s", formattedString);
+        HAL_UARTEx_ReceiveToIdle_IT(&huart1, rxBuffer, sizeof(rxBuffer));
     }
 }
 
-void processReceivedData(void)
-{
-    char receivedData[RX_BUFFER_SIZE];
-    uint16_t dataIndex = 0;
-    while (readIndex != writeIndex)
-    {
-        const unsigned char c = rxBuffer[readIndex];
-        receivedData[dataIndex++] = c;
-        readIndex = (readIndex + 1) % RX_BUFFER_SIZE;
-    }
-    receivedData[dataIndex] = '\0';
-    printf("%s", receivedData);
-}
 
 /* USER CODE END 0 */
 
@@ -141,15 +110,8 @@ int main(void)
 
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
-    RetargetInit(&huart1);
-    HAL_UART_Receive_IT(&huart1, tempBuffer, sizeof(tempBuffer));
     while (1)
     {
-        if (uart1RxFlag)
-        {
-            uart1RxFlag = 0;
-            processReceivedData();
-        }
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
@@ -221,6 +183,8 @@ static void MX_USART1_UART_Init(void)
     }
     /* USER CODE BEGIN USART1_Init 2 */
 
+    RetargetInit(&huart1);
+    HAL_UARTEx_ReceiveToIdle_IT(&huart1, rxBuffer, sizeof(rxBuffer));
     /* USER CODE END USART1_Init 2 */
 }
 
