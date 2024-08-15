@@ -22,6 +22,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "retarget.h"
 /* USER CODE END Includes */
 
@@ -52,6 +55,7 @@ uint8_t rxBuffer[RX_BUFFER_SIZE]; // 增大缓冲区大小
 uint8_t tempBuffer[1]; // 临时缓冲区
 volatile uint16_t writeIndex = 0; // 写入索引
 volatile uint16_t readIndex = 0; // 读取索引
+char* ac = "";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -88,15 +92,16 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 
 void processReceivedData(void)
 {
+    char receivedData[RX_BUFFER_SIZE];
+    uint16_t dataIndex = 0;
     while (readIndex != writeIndex)
     {
         const unsigned char c = rxBuffer[readIndex];
-        if (c != '\0')
-        {
-            printf("%c", c);
-        }
+        receivedData[dataIndex++] = c;
         readIndex = (readIndex + 1) % RX_BUFFER_SIZE;
     }
+    receivedData[dataIndex] = '\0';
+    printf("%s", receivedData);
 }
 
 /* USER CODE END 0 */
