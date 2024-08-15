@@ -45,6 +45,8 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 
+volatile uint8_t uart1RxFlag = 0; // 中断标志符
+
 #define RX_BUFFER_SIZE 100
 uint8_t rxBuffer[RX_BUFFER_SIZE]; // 增大缓冲区大小
 uint8_t tempBuffer[1]; // 临时缓冲区
@@ -66,7 +68,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 {
     if (huart->Instance == USART1)
     {
-        for (int i = 0; i < sizeof(tempBuffer); i++)
+        for (size_t i = 0; i < sizeof(tempBuffer); i++)
         {
             rxBuffer[writeIndex] = tempBuffer[i];
             writeIndex = (writeIndex + 1) % RX_BUFFER_SIZE;
@@ -79,6 +81,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
             }
         }
 
+        uart1RxFlag = 1; // 设置中断标志符
         HAL_UART_Receive_IT(&huart1, tempBuffer, sizeof(tempBuffer));
     }
 }
@@ -87,7 +90,11 @@ void processReceivedData(void)
 {
     while (readIndex != writeIndex)
     {
-        printf("%c", rxBuffer[readIndex]);
+        const unsigned char c = rxBuffer[readIndex];
+        if (c != '\0')
+        {
+            printf("%c", c);
+        }
         readIndex = (readIndex + 1) % RX_BUFFER_SIZE;
     }
 }
@@ -133,7 +140,11 @@ int main(void)
     HAL_UART_Receive_IT(&huart1, tempBuffer, sizeof(tempBuffer));
     while (1)
     {
-        processReceivedData();
+        if (uart1RxFlag)
+        {
+            uart1RxFlag = 0;
+            processReceivedData();
+        }
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
