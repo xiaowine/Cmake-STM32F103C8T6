@@ -9,7 +9,6 @@
 #include <retarget.h>
 #include <stdint.h>
 #include <stdio.h>
-
 #define STDIN_FILENO  0
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
@@ -23,6 +22,9 @@ void RetargetInit(UART_HandleTypeDef* huart)
     /* Disable I/O buffering for STDOUT stream, so that
      * chars are sent out as soon as they are printed. */
     setvbuf(stdout, NULL, _IONBF, 0);
+    printf("Hello World\n");
+    printf("Clock: %lu MHz\n", HAL_RCC_GetSysClockFreq() / 1000000);
+    printf("Unique ID: %08lX%08lX%08lX\n", *(uint32_t*)0x1FFFF7E8, *(uint32_t*)0x1FFFF7EC, *(uint32_t*)0x1FFFF7F0);
 }
 
 int _isatty(int fd)

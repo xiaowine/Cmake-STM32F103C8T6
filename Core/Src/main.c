@@ -98,7 +98,6 @@ int main(void)
     RetargetInit(&huart1);
     while (1)
     {
-        printf("Hello World\n");
         HAL_Delay(1000);
     /* USER CODE END WHILE */
 
