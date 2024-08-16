@@ -93,8 +93,6 @@ int main(void)
     MX_USART1_UART_Init();
     MX_TIM1_Init();
     /* USER CODE BEGIN 2 */
-
-    RetargetInit(&huart1);
     DHT11_Data_TypeDef DH;
     DH._GPIO_PORT = GPIOA;
     DH.GPIO_Pin = GPIO_PIN_8;
@@ -193,7 +191,7 @@ static void MX_TIM1_Init(void)
         Error_Handler();
     }
     /* USER CODE BEGIN TIM1_Init 2 */
-
+    RetargetInit(&huart1);
     /* USER CODE END TIM1_Init 2 */
 }
 
