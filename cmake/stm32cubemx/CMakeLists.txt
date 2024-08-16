@@ -40,7 +40,6 @@ target_sources(stm32cubemx INTERFACE
     ../../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_exti.c
     ../../Core/Src/system_stm32f1xx.c
     ../../Core/Src/sysmem.c
-    ../../Core/Src/syscalls.c
     ../../startup_stm32f103xb.s
 )
 
