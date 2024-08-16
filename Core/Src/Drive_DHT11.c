@@ -1,16 +1,16 @@
 #include "Drive_DHT11.h"
 extern TIM_HandleTypeDef htim1;
-static void DHT11_Mode_IPU(DHT11_Data_TypeDef* DHT11_Data); //设置端口为输入模式
-static void DHT11_Mode_Out_pp(DHT11_Data_TypeDef* DHT11_Data); //设置端口为输出模式
-static uint8_t DHT11_ReadByte(DHT11_Data_TypeDef* DHT11_Data); //读取一个字节
+static void DHT11_Mode_IPU(const DHT11_Data_TypeDef* DHT11_Data); //设置端口为输入模式
+static void DHT11_Mode_Out_pp(const DHT11_Data_TypeDef* DHT11_Data); //设置端口为输出模式
+static uint8_t DHT11_ReadByte(const DHT11_Data_TypeDef* DHT11_Data); //读取一个字节
 static void delay_us(uint16_t us); //us级延时函数
 
 #define DHT11_Data_IN HAL_GPIO_ReadPin(DHT11_Data->_GPIO_PORT,DHT11_Data->GPIO_Pin)
 
-#define DHT11_GPIO_HIGH HAL_GPIO_WritePin(DHT11_Data->_GPIO_PORT,DHT11_Data->GPIO_Pin,SET);
-#define DHT11_GPIO_LOW HAL_GPIO_WritePin(DHT11_Data->_GPIO_PORT,DHT11_Data->GPIO_Pin,RESET);
+#define DHT11_GPIO_HIGH HAL_GPIO_WritePin(DHT11_Data->_GPIO_PORT,DHT11_Data->GPIO_Pin,GPIO_PIN_SET);
+#define DHT11_GPIO_LOW HAL_GPIO_WritePin(DHT11_Data->_GPIO_PORT,DHT11_Data->GPIO_Pin,GPIO_PIN_RESET);
 
-static void delay_us(uint16_t us)
+static void delay_us(const uint16_t us)
 {
     uint16_t differ = 0xffff - us - 5;
 
@@ -23,7 +23,7 @@ static void delay_us(uint16_t us)
     HAL_TIM_Base_Stop(&htim1);
 }
 
-static void DHT11_Mode_IPU(DHT11_Data_TypeDef* DHT11_Data)
+static void DHT11_Mode_IPU(const DHT11_Data_TypeDef* DHT11_Data)
 {
     GPIO_InitTypeDef GPIO_InitStruct;
     GPIO_InitStruct.Pin = DHT11_Data->GPIO_Pin;
@@ -32,7 +32,7 @@ static void DHT11_Mode_IPU(DHT11_Data_TypeDef* DHT11_Data)
     HAL_GPIO_Init(DHT11_Data->_GPIO_PORT, &GPIO_InitStruct);
 }
 
-static void DHT11_Mode_Out_pp(DHT11_Data_TypeDef* DHT11_Data)
+static void DHT11_Mode_Out_pp(const DHT11_Data_TypeDef* DHT11_Data)
 {
     GPIO_InitTypeDef GPIO_InitStruct;
 
@@ -42,19 +42,23 @@ static void DHT11_Mode_Out_pp(DHT11_Data_TypeDef* DHT11_Data)
     HAL_GPIO_Init(DHT11_Data->_GPIO_PORT, &GPIO_InitStruct);
 }
 
-static uint8_t DHT11_ReadByte(DHT11_Data_TypeDef* DHT11_Data)
+static uint8_t DHT11_ReadByte(const DHT11_Data_TypeDef* DHT11_Data)
 {
-    uint8_t i, temp = 0;
+    uint8_t temp = 0;
 
-    for (i = 0; i < 8; ++i)
+    for (uint8_t i = 0; i < 8; ++i)
     {
-        while (DHT11_Data_IN == GPIO_PIN_RESET); //等待拉高信号,开始读取
+        while (DHT11_Data_IN == GPIO_PIN_RESET)
+        {
+        } //等待拉高信号,开始读取
         delay_us(40); //等待
 
         //        数据信号电平高低转换位0,1
         if (DHT11_Data_IN == GPIO_PIN_SET)
         {
-            while (DHT11_Data_IN == GPIO_PIN_SET);
+            while (DHT11_Data_IN == GPIO_PIN_SET)
+            {
+            }
             temp |= (uint8_t)(0x01 << (7 - i));
         }
         else
@@ -72,9 +76,6 @@ static uint8_t DHT11_ReadByte(DHT11_Data_TypeDef* DHT11_Data)
  */
 uint8_t DHT11_Read_TempHumi(DHT11_Data_TypeDef* DHT11_Data)
 {
-    uint8_t temp;
-    uint16_t humi_temp;
-
     //    通知DHT11开始读取数据
     DHT11_Mode_Out_pp(DHT11_Data);
     DHT11_GPIO_LOW
@@ -88,8 +89,12 @@ uint8_t DHT11_Read_TempHumi(DHT11_Data_TypeDef* DHT11_Data)
     if (DHT11_Data_IN == GPIO_PIN_RESET)
     {
         //        等待DHT11通知可以开始读取
-        while (DHT11_Data_IN == GPIO_PIN_RESET);
-        while (DHT11_Data_IN == GPIO_PIN_SET);
+        while (DHT11_Data_IN == GPIO_PIN_RESET)
+        {
+        }
+        while (DHT11_Data_IN == GPIO_PIN_SET)
+        {
+        }
 
         DHT11_Data->humi_high8bit = DHT11_ReadByte(DHT11_Data);
         DHT11_Data->humi_low8bit = DHT11_ReadByte(DHT11_Data);
@@ -102,10 +107,10 @@ uint8_t DHT11_Read_TempHumi(DHT11_Data_TypeDef* DHT11_Data)
         DHT11_GPIO_HIGH;
 
         //        计算校验和
-        uint8_t temp_check = DHT11_Data->humi_high8bit + DHT11_Data->humi_low8bit + DHT11_Data->temp_high8bit +
+        const uint8_t temp_check = DHT11_Data->humi_high8bit + DHT11_Data->humi_low8bit + DHT11_Data->temp_high8bit +
             DHT11_Data->temp_low8bit;
         if (temp_check == DHT11_Data->check_sum) return 0;
-        else return 1;
+        return 1;
     }
-    else return 1;
+    return 1;
 }
