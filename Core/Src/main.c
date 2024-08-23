@@ -62,70 +62,6 @@ static void MX_ADC1_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-char* float_to_string(float f, int precision)
-{
-    int b, l, i = 0;
-    const int sign = (f < 0.0) ? 1 : 0;
-
-    if (sign)
-    {
-        f *= -1;
-    }
-
-    int a = f;
-    f -= a;
-    int k = 0;
-
-    while (1)
-    {
-        l = pow(10, k);
-        int m = a / l;
-        if (m == 0)
-        {
-            break;
-        }
-        k++;
-    }
-    k--;
-
-    int int_len = k + 1;
-    int total_len = int_len + precision + (precision != 0) + sign + 1;
-    char* str = malloc(total_len * sizeof(char));
-    if (!str)
-    {
-        return NULL;
-    }
-
-    if (sign)
-    {
-        str[i++] = '-';
-    }
-
-    for (l = k + 1; l > 0; l--)
-    {
-        b = pow(10, l - 1);
-        const int c = a / b;
-        str[i++] = c + '0';
-        a %= b;
-    }
-
-    if (precision != 0)
-    {
-        str[i++] = '.';
-    }
-
-    for (l = 0; l < precision; l++)
-    {
-        f *= 10.0;
-        b = f;
-        str[i++] = b + '0';
-        f -= b;
-    }
-
-    str[i] = '\0';
-    return str;
-}
-
 /* USER CODE END 0 */
 
 /**
@@ -177,9 +113,9 @@ int main(void)
         const uint32_t ad_value = HAL_ADC_GetValue(&hadc1);
         printf("ADC ADC value: %d\n", ad_value);
         const float vol_value = ad_value * (3.3f / 4096.0f);
-        printf("ADC VOL value: %sV\n", float_to_string(vol_value, 2));
+        printf("ADC VOL value: %.2fV\n", vol_value);
         const uint32_t temperature = (1.43 - vol_value) / 0.0043 + 25;
-        printf("MCU Internal Temperature: %s\n", float_to_string(temperature, 2));
+        printf("MCU Internal Temperature: %.2f\n", temperature);
         HAL_Delay(1000);
         // printf("Hello World\n");
     /* USER CODE END WHILE */
