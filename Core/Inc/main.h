@@ -59,6 +59,13 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define FAN_MOS_Pin GPIO_PIN_1
+#define FAN_MOS_GPIO_Port GPIOB
+#define ARGB_MOS_Pin GPIO_PIN_2
+#define ARGB_MOS_GPIO_Port GPIOB
+#define SW_Pin GPIO_PIN_10
+#define SW_GPIO_Port GPIOA
+#define SW_EXTI_IRQn EXTI15_10_IRQn
 
 /* USER CODE BEGIN Private defines */
 
